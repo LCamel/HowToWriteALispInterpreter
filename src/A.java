@@ -36,6 +36,10 @@ public class A {
         if (expr instanceof String) { return env.get(expr); }
 
         List<Object> list = (List<Object>) expr;
+        if (list.get(0).equals("define")) { // special form
+            env.put((String) list.get(1), eval(list.get(2), env));
+            return null;
+        }
         String op = (String) list.remove(0);
         List<Object> args = list.stream().map(x -> eval(x, env)).collect(Collectors.toList());
 
