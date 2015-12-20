@@ -10,6 +10,20 @@ public class A {
         System.out.println("tokens: " + tokens);
         Object expr = parseOne(tokens);
         System.out.println("expr: " + expr);
+        Object result = eval(expr);
+        System.out.println("result of eval: " + result);
+    }
+
+    private static Object eval(Object expr) {
+        if (expr instanceof Integer) { return expr; }
+
+        List<Object> list = (List<Object>) expr;
+        String op = (String) list.remove(0);
+        List<Object> args = list;
+        if (op.equals("+"))  { return ((Integer) eval(args.get(0))) + ((Integer) eval(args.get(1))); }
+        if (op.equals("*"))  { return ((Integer) eval(args.get(0))) * ((Integer) eval(args.get(1))); }
+
+        throw new RuntimeException("?");
     }
 
     private static Object parseOne(List<String> tokens) {
