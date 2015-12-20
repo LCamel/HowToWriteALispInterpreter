@@ -10,9 +10,14 @@ import java.util.stream.Collectors;
 public class A {
     private static class Env extends HashMap<String, Object> {
     }
-    public static void main(String[] args) {
+    private interface Func {
+        public Object eval(List<Object> args);
+    }
+    public static void main(String[] args0) {
         Env env = new Env();
         env.put("pi", 3);
+        env.put("+", (Func) (args -> ((Integer) args.get(0)) + ((Integer) args.get(1))));
+        env.put("*", (Func) (args -> ((Integer) args.get(0)) * ((Integer) args.get(1))));
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -43,10 +48,7 @@ public class A {
         String op = (String) list.remove(0);
         List<Object> args = list.stream().map(x -> eval(x, env)).collect(Collectors.toList());
 
-        if (op.equals("+"))  { return ((Integer) args.get(0)) + ((Integer) args.get(1)); }
-        if (op.equals("*"))  { return ((Integer) args.get(0)) * ((Integer) args.get(1)); }
-
-        throw new RuntimeException("?");
+        return ((Func) env.get(op)).eval(args);
     }
 
     private static Object parseOne(List<String> tokens) {
