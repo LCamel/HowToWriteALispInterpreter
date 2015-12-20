@@ -1,26 +1,34 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 public class A {
+    private static class Env extends HashMap<String, Object> {
+    }
     public static void main(String[] args) {
-        List<String> tokens = getTokens("(+ (* 2 3) 4)");
+        List<String> tokens = getTokens("(+ (* 2 pi) 4)");
         System.out.println("tokens: " + tokens);
         Object expr = parseOne(tokens);
         System.out.println("expr: " + expr);
-        Object result = eval(expr);
+
+        Env env = new Env();
+        env.put("pi", 3);
+        Object result = eval(expr, env);
         System.out.println("result of eval: " + result);
     }
 
-    private static Object eval(Object expr) {
+    private static Object eval(Object expr, Env env) {
         if (expr instanceof Integer) { return expr; }
+        if (expr instanceof String) { return env.get(expr); }
+
 
         List<Object> list = (List<Object>) expr;
         String op = (String) list.remove(0);
-        List<Object> args = list.stream().map(x -> eval(x)).collect(Collectors.toList());
+        List<Object> args = list.stream().map(x -> eval(x, env)).collect(Collectors.toList());
 
         if (op.equals("+"))  { return ((Integer) args.get(0)) + ((Integer) args.get(1)); }
         if (op.equals("*"))  { return ((Integer) args.get(0)) * ((Integer) args.get(1)); }
