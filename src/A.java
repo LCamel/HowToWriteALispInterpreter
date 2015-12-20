@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 
@@ -10,21 +11,29 @@ public class A {
     private static class Env extends HashMap<String, Object> {
     }
     public static void main(String[] args) {
-        List<String> tokens = getTokens("(+ (* 2 pi) 4)");
+        Env env = new Env();
+        env.put("pi", 3);
+
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            String line = scanner.nextLine();
+            System.out.println(evalLine(line, env));
+        }
+    }
+
+    private static Object evalLine(String line, Env env) {
+        List<String> tokens = getTokens(line);
         System.out.println("tokens: " + tokens);
         Object expr = parseOne(tokens);
         System.out.println("expr: " + expr);
 
-        Env env = new Env();
-        env.put("pi", 3);
         Object result = eval(expr, env);
-        System.out.println("result of eval: " + result);
+        return result;
     }
 
     private static Object eval(Object expr, Env env) {
         if (expr instanceof Integer) { return expr; }
         if (expr instanceof String) { return env.get(expr); }
-
 
         List<Object> list = (List<Object>) expr;
         String op = (String) list.remove(0);
