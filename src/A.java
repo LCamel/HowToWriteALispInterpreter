@@ -26,7 +26,11 @@ public class A {
         } else if (token.equals(")")) {
             throw new RuntimeException("found ')' but no '('");
         } else {
-            return token;
+            try {
+                return Integer.parseInt(token);
+            } catch (Exception e) {
+                return token;
+            }
         }
     }
 
