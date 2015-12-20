@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class A {
@@ -19,9 +20,10 @@ public class A {
 
         List<Object> list = (List<Object>) expr;
         String op = (String) list.remove(0);
-        List<Object> args = list;
-        if (op.equals("+"))  { return ((Integer) eval(args.get(0))) + ((Integer) eval(args.get(1))); }
-        if (op.equals("*"))  { return ((Integer) eval(args.get(0))) * ((Integer) eval(args.get(1))); }
+        List<Object> args = list.stream().map(x -> eval(x)).collect(Collectors.toList());
+
+        if (op.equals("+"))  { return ((Integer) args.get(0)) + ((Integer) args.get(1)); }
+        if (op.equals("*"))  { return ((Integer) args.get(0)) * ((Integer) args.get(1)); }
 
         throw new RuntimeException("?");
     }
