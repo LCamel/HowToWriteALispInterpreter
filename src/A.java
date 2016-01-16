@@ -9,12 +9,21 @@ import java.util.stream.Collectors;
 
 public class A {
     private static class Env extends HashMap<String, Object> {
+        private Env outer;
+        public Env(Env outer) {
+            this.outer = outer;
+        }
+        @Override
+        public Object get(Object key) {
+            Object tmp = super.get(key);
+            return tmp != null ? tmp : outer.get(key);
+        }
     }
     private interface Func {
-        public Object eval(List<Object> args);
+        public Object run(List<Object> args);
     }
     public static void main(String[] args0) {
-        Env env = new Env();
+        Env env = new Env(null);
         env.put("pi", 3);
         env.put("+", (Func) (args -> ((Integer) args.get(0)) + ((Integer) args.get(1))));
         env.put("*", (Func) (args -> ((Integer) args.get(0)) * ((Integer) args.get(1))));
@@ -45,10 +54,31 @@ public class A {
             env.put((String) list.get(1), eval(list.get(2), env));
             return null;
         }
-        String op = (String) list.remove(0);
-        List<Object> args = list.stream().map(x -> eval(x, env)).collect(Collectors.toList());
+        if (list.get(0).equals("lambda")) { // special form
+            // (lambda (w h) (* w h))  params / body
+            final List<Object> params = (List<Object>) list.get(1);
+            final Object body = list.get(2);
+            final Env origEnv = env;
+            return new Func() {
+                @Override
+                public Object run(List<Object> args) {
+                    // System.out.println("====");
+                    // System.out.println("run: " + args);
+                    // System.out.println("params: " + params);
+                    // System.out.println("body: " + body);
+                    // System.out.println("origEnv: " + origEnv);
+                    Env newEnv = new Env(origEnv);
+                    for (int i = 0; i < args.size(); i++) {
+                        newEnv.put((String) params.get(i), args.get(i));
+                    }
+                    return eval(body, newEnv);
+                }
+            };
+        }
 
-        return ((Func) env.get(op)).eval(args);
+        List<Object> evaled = list.stream().map(x -> eval(x, env)).collect(Collectors.toList());
+        Func func = (Func) evaled.remove(0);
+        return func.run(evaled);
     }
 
     private static Object parseOne(List<String> tokens) {
